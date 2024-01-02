@@ -42,10 +42,12 @@ int main() {
                             "] " + formattedcwd + RESET + "\n" + formattedchar + RESET;
 
         std::cout << prompt;
+        
         std::getline(std::cin, cmd);
-
+        if (std::cin.eof()){
+            exit(0);
+        }
         std::vector<std::string> tokens = split(&cmd);
-
         if (tokens.empty()) {
             continue;
         }
