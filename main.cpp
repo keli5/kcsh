@@ -58,6 +58,7 @@ int main() {
 
         // UGHHHHH
         if (cmd == "cd") {
+
             fs::path path = join(args+1);
             
             path = path.is_absolute() ? path : fs::absolute(path);
@@ -68,6 +69,8 @@ int main() {
                 errno = 2;
                 perror("cd");
             }
+        } else if (cmd == "exit") {
+            exit(0);
         } else {
             shellexec(cmd, args);
         }
