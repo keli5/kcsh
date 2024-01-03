@@ -1,2 +1,4 @@
 build/
 core.*
+# clangd debugger
+.cache

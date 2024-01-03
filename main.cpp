@@ -60,23 +60,26 @@ int main() {
         cmd = cstringTokens[0];
         args = const_cast<char**>(cstringTokens.data());
 
-        for (char** arg = args; *arg != nullptr; ++arg) {
-            *arg = const_cast<char*>(replaceSubstring(*arg, "~", homePath().string()).c_str());
-        }
 
         std::vector<std::string> builtins = {"cd", "exit", "which"}; // Remember to add your builtins!!!
 
         // UGHHHHH
         if (cmd == "cd") {
             std::string params = join(args+1);
-            if (params == "-"){
+            if(params.size()==0){
+                setenv("OLDPWD", fs::current_path().c_str(), 1);
+                fs::current_path(homePath());
+                setenv("PWD", fs::current_path().c_str(), 1);
+                continue;
+            }
+            else if (params == "-"){
                 char* dest = std::getenv("OLDPWD");
                 setenv("OLDPWD", fs::current_path().c_str(), 1);
                 fs::current_path(dest);
                 setenv("PWD", fs::current_path().c_str(), 1);
                 continue;
             }else if (params.at(0)=='~'){
-                replaceSubstring(params, "~", homePath());
+                params = replaceSubstring(params, "~", homePath().string());
             }
             fs::path path = params;
             
