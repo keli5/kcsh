@@ -16,6 +16,8 @@
 namespace fs = std::filesystem;
 
 int main() {
+    setenv("OLDPWD", fs::current_path().c_str(), 1);
+    setenv("PWD", fs::current_path().c_str(), 1);
     while (true) {
 
         std::string prompt_color        = FG_WHITE;
@@ -63,13 +65,22 @@ int main() {
 
         // UGHHHHH
         if (cmd == "cd") {
-
-            fs::path path = join(args+1);
+            std::string params = join(args+1);
+            if (params == "-"){
+                char* dest = std::getenv("OLDPWD");
+                setenv("OLDPWD", fs::current_path().c_str(), 1);
+                fs::current_path(dest);
+                setenv("PWD", fs::current_path().c_str(), 1);
+                continue;
+            }
+            fs::path path = params;
             
             path = path.is_absolute() ? path : fs::absolute(path);
 
             if (fs::exists(path) && fs::is_directory(path)) {
+                setenv("OLDPWD", fs::current_path().c_str(), 1);
                 fs::current_path(path);
+                setenv("PWD", fs::current_path().c_str(), 1);
             } else {
                 errno = 2;
                 perror("cd");
