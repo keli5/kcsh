@@ -5,8 +5,6 @@
 #include "shellutil/stringutil.hpp"
 #include "shellutil/sysutil.hpp"
 #include "shellutil/vecutil.hpp"
-#include <algorithm>
-#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -15,7 +13,7 @@
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <limits.h>
+#include <limits.h> // This IS used wtf?
 
 namespace fs = std::filesystem;
 
@@ -111,6 +109,15 @@ int main([[gnu::unused]] int argc, char** argv) {
         if (std::cin.eof()) {
             exit(0);
         }
+
+        auto [environment, remainingCommand] = parseEnvVars(cmd);
+
+        for (const auto& pair : environment) {
+            setenv(pair.first.c_str(), pair.second.c_str(), 1);
+        }
+
+        cmd = remainingCommand;
+
         std::vector<std::string> tokens = split(&cmd);
         if (tokens.empty()) {
             continue;

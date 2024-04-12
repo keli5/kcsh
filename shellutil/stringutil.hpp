@@ -1,10 +1,60 @@
 #ifndef KCSH_STRINGUTIL
 #define KCSH_STRINGUTIL
 
-#include <iostream>
 #include <sstream>
 #include <string>
+#include <map>
 #include <vector>
+
+inline std::pair<std::map<std::string, std::string>, std::string> parseEnvVars(const std::string& input) {
+    std::map<std::string, std::string> result;
+
+    size_t pos = 0;
+    while (pos < input.length()) {
+        // find = position
+        size_t eqPos = input.find('=', pos);
+        if (eqPos == std::string::npos)
+            break;
+
+        // get key
+        std::string key = input.substr(pos, eqPos - pos);
+
+        // todo: die
+        size_t spacePos = input.find(' ', eqPos);
+        if (spacePos == std::string::npos)
+            spacePos = input.length();
+
+        // value
+        size_t valueStartPos = eqPos + 1;
+        std::string value;
+        if (input[valueStartPos] == '"') {
+            // starts with a quote, parse for spaces
+            size_t quoteEndPos = input.find('"', valueStartPos + 1);
+            if (quoteEndPos != std::string::npos) {
+                value = input.substr(valueStartPos + 1, quoteEndPos - valueStartPos - 1);
+                spacePos = quoteEndPos + 1;
+            }
+        } else {
+            // go to first space
+            value = input.substr(valueStartPos, spacePos - valueStartPos);
+        }
+
+        result[key] = value;
+
+        // do it all again fucking GOD
+        pos = spacePos + 1;
+    }
+
+    std::string remainingCommand;
+
+    try {
+        remainingCommand = input.substr(pos);
+    } catch (const std::out_of_range& e) {
+        remainingCommand = "";
+    }
+
+    return {result, remainingCommand};
+}
 
 inline std::vector<std::string> split(std::string inputString, char delimiter = ' ') {
     std::istringstream iss(inputString);
